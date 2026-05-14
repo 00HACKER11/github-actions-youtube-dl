@@ -15,12 +15,14 @@ jobs:
 
       - name: download
         run: |
-          git config --local user.email "justjavac@gmail.com"
-          git config --local user.name "迷渡"
-          git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git pull --rebase
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           sudo apt update && sudo apt install -y yt-dlp
           yt-dlp --config-location config.txt
-          git add .
-          git commit -m "download youtube video"
-          git push
+          if [ -n "$(git status --porcelain)" ]; then
+            git add downloads/
+            git commit -m "Add downloaded video"
+            git push
+          else
+            echo "No changes to commit"
+          fi
