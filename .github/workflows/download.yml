@@ -1,0 +1,35 @@
+name: Download Video
+
+on:
+  push:
+    paths:
+      - 'playlist.txt'
+  workflow_dispatch:
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install yt-dlp
+        run: sudo apt update && sudo apt install -y yt-dlp
+
+      - name: Download videos
+        run: yt-dlp --config-location config.txt --output "downloads/%(title)s.%(ext)s"
+
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add downloads/
+            git commit -m "Add downloaded video(s)"
+            git push
+          else
+            echo "No new video to commit"
+          fi
